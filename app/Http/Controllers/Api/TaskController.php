@@ -99,4 +99,31 @@ class TaskController extends Controller
         $task->delete();
         return response()->json(['message' => 'Task deleted successfully']);
     }
+
+ 
+    public function report(Request $request)
+    {
+    // Use the date from the URL, or default to today's date
+    $date = $request->query('date', date('Y-m-d'));
+
+    $priorities = ['high', 'medium', 'low'];
+    $statuses = ['pending', 'in_progress', 'done'];
+    $summary = [];
+
+    foreach ($priorities as $priority) {
+        foreach ($statuses as $status) {
+            // Count tasks matching this specific date, priority, and status
+            $summary[$priority][$status] = Task::where('due_date', $date)
+                ->where('priority', $priority)
+                ->where('status', $status)
+                ->count();
+        }
+    }
+
+    return response()->json([
+        'report_date' => $date,
+        'data' => $summary
+    ]);
+    }
+
 }
